@@ -2,7 +2,6 @@
 An Agentic AI Framework for Explainable Biomedical Knowledge Discovery
 
 
-Perfect 👏 — you’re now thinking like a **project lead**.
 Let’s turn your **Graph-Augmented Agentic Biomedical QA** idea into a **structured implementation plan**, divided into realistic **sprints (agile style)**.
 
 Each sprint is 1–2 weeks, with **clear goals, deliverables, tools, and verification**.
