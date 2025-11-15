@@ -1,293 +1,169 @@
-# BioGraphX
-An Agentic AI Framework for Explainable Biomedical Knowledge Discovery
 
+# 📘 **BioGraphX — Sprint 1 Documentation**
 
-Let’s turn your **Graph-Augmented Agentic Biomedical QA** idea into a **structured implementation plan**, divided into realistic **sprints (agile style)**.
+## 🧬 Project Overview
 
-Each sprint is 1–2 weeks, with **clear goals, deliverables, tools, and verification**.
-This plan assumes a total duration of about **8 weeks (4 sprints)** — easily adjustable.
+**BioGraphX** is an end-to-end *Graph-Augmented, Agentic Biomedical Question-Answering System*.
+It integrates:
 
----
+* A Neo4j biomedical knowledge graph
+* SciSpaCy-based biomedical entity extraction
+* BioBERT/SciBERT embedding-based retrieval
+* A LangGraph multi-agent reasoning pipeline
+* A Streamlit interface for interpretable QA
 
-## 🚀 **High-Level Roadmap**
-
-| Sprint          | Theme                                | Core Goal                                                                            |
-| --------------- | ------------------------------------ | ------------------------------------------------------------------------------------ |
-| 🧩 **Sprint 1** | Data ingestion & entity mapping      | Collect and normalize Kaggle datasets → clean, link, and prepare for graph ingestion |
-| 🕸 **Sprint 2** | Graph construction & Neo4j setup     | Build biomedical knowledge graph with nodes & edges                                  |
-| 🧠 **Sprint 3** | Retrieval & Agentic reasoning layer  | Build vector store, retrieval pipeline, multi-agent reasoning                        |
-| 💬 **Sprint 4** | Explainable UI + evaluation + polish | Create Streamlit interface, test explainability & evaluation                         |
+This README documents **Sprint 1 deliverables** as defined in the project plan.
 
 ---
 
-## 🧩 **Sprint 1 — Data Ingestion & Entity Mapping**
+# 🟦 **Sprint 1 — Project Bootstrapping & Data Download**
 
-### 🎯 **Goal**
-
-Prepare all biomedical data (from Kaggle) and unify entities with common IDs so later modules can join seamlessly.
-
-### 🧱 **Tasks**
-
-1. **Set up environment**
-
-   * Install: `pandas`, `numpy`, `scispacy`, `neo4j`, `py2neo`, `sentence-transformers`, `chromadb`, `langchain`, `langgraph`, `streamlit`.
-   * Initialize Git + Docker setup for reproducibility.
-
-2. **Download Kaggle datasets**
-
-   * `MedQuAD`
-   * `PubMed Abstracts`
-   * `PubMedQA`
-   * `MedMCQA`
-   * `Drug–Disease Interactions`
-
-3. **Data cleaning & formatting**
-
-   * Remove nulls, duplicates, HTML artifacts.
-   * Normalize column names (`drug`, `disease`, `relation`, etc.).
-   * Save cleaned CSVs in `data/processed/`.
-
-4. **Entity extraction (NER)**
-
-   * Use **SciSpaCy** with UMLS model:
-     `en_core_sci_lg` + `UmlsEntityLinker`
-   * Extract mentions of **Drugs**, **Diseases**, **Genes** from MedQuAD and PubMed text.
-
-5. **Entity mapping**
-
-   * Create mapping tables:
-
-     * `drug_name → DrugBank_ID`
-     * `disease_name → UMLS_CUI`
-     * `gene_symbol → Entrez_ID`
-   * Deduplicate synonyms.
-
-6. **Validation**
-
-   * Check overlap of entities between datasets (MedQuAD ↔ PubMed ↔ Drug–Disease).
-   * Expect > 80 % coverage for major entities.
-
-### 📦 **Deliverables**
-
-* Cleaned datasets (`.csv`)
-* Mapping tables for drugs/diseases/genes
-* Notebook showing extraction + coverage summary
-
-### 🧰 **Key Tools**
-
-`pandas`, `SciSpaCy`, `UMLS`, `DrugBank`, `Entrez`, `Python`
+Sprint 1 focuses entirely on **setting up the environment**, **downloading datasets**, and **performing initial exploration (EDA)**.
+No modeling, extraction, or graph construction happens yet.
 
 ---
 
-## 🕸 **Sprint 2 — Graph Construction & Neo4j Setup**
+## ✅ **1. Repository & Environment Setup**
 
-### 🎯 **Goal**
+### ✔ Create project structure
 
-Create a **Biomedical Knowledge Graph (BKG)** integrating the cleaned data.
-
-### 🧱 **Tasks**
-
-1. **Set up Neo4j**
-
-   * Launch via Docker or Neo4j Desktop.
-   * Create DB: `biomed_graph`.
-
-2. **Design schema**
-
-   * **Nodes:** `Drug`, `Disease`, `Gene`, `Publication`, `Question`
-   * **Relationships:**
-
-     ```
-     (Drug)-[:TREATS]->(Disease)
-     (Disease)-[:ASSOCIATED_WITH]->(Gene)
-     (Drug)-[:MENTIONED_IN]->(Publication)
-     (Question)-[:REFERS_TO]->(Disease|Drug)
-     ```
-   * Properties: `id`, `name`, `source`, `confidence`, `pmid`.
-
-3. **Load nodes & edges**
-
-   * Write `src/06_load_neo4j.py` loader using `py2neo` or `cypher-shell`.
-   * Load:
-
-     * `nodes_drug.csv`
-     * `nodes_disease.csv`
-     * `rel_drug_treats_disease.csv`
-   * Add uniqueness constraints.
-
-4. **Cross-verify**
-
-   * Run sample Cypher queries:
-
-     ```cypher
-     MATCH (d:Drug)-[:TREATS]->(s:Disease)
-     RETURN d.name, s.name LIMIT 10;
-     ```
-
-5. **Integrate publications**
-
-   * Link `Drug` and `Disease` to `Publication` using PMIDs from PubMed abstracts.
-
-6. **Visualize subgraphs**
-
-   * Use `pyvis` or Neo4j Bloom to explore structure.
-
-### 📦 **Deliverables**
-
-* Functional Neo4j instance with connected nodes
-* Example Cypher queries
-* Screenshot or graph visualization for report
-
-### 🧰 **Key Tools**
-
-`Neo4j`, `py2neo`, `pandas`, `pyvis`, `Docker`
-
----
-
-## 🧠 **Sprint 3 — Retrieval & Agentic Reasoning Layer**
-
-### 🎯 **Goal**
-
-Implement **Retrieval-Augmented Generation (RAG)** + multi-agent reasoning pipeline.
-
-### 🧱 **Tasks**
-
-1. **Vector database**
-
-   * Split PubMed abstracts into sentences.
-   * Encode using `BioBERT` / `SciBERT` (via `sentence-transformers`).
-   * Store embeddings in **ChromaDB**.
-
-2. **Retriever testing**
-
-   * Query similarity:
-
-     ```python
-     collection.query(query_texts=["metformin alzheimer mechanism"], n_results=5)
-     ```
-   * Validate top results manually.
-
-3. **Agent design (LangGraph)**
-
-   * **Parser Agent:** Extract entities from question.
-   * **Graph Query Agent:** Query Neo4j for relationships.
-   * **Evidence Agent:** Retrieve relevant abstracts from Chroma.
-   * **Synthesis Agent:** Combine graph + text to craft an answer.
-   * **Explanation Agent:** Format with citations + graph paths.
-
-4. **Pipeline orchestration**
-
-   * Connect all agents in LangGraph DAG:
-
-     ```
-     Parser → GraphQuery → Evidence → Synthesis → Explanation
-     ```
-   * Use **BioGPT** or **GPT-4** for the Synthesis node.
-
-5. **Logging + traceability**
-
-   * Save reasoning steps as JSON (for explainability).
-
-### 📦 **Deliverables**
-
-* Chroma vector index
-* Working LangGraph multi-agent pipeline
-* JSON responses containing `answer`, `graph_paths`, `evidence (PMIDs)`
-
-### 🧰 **Key Tools**
-
-`BioBERT`, `ChromaDB`, `LangChain`, `LangGraph`, `BioGPT`, `Neo4j`
-
----
-
-## 💬 **Sprint 4 — Explainable UI + Evaluation**
-
-### 🎯 **Goal**
-
-Deliver an interactive, explainable biomedical QA system with metrics.
-
-### 🧱 **Tasks**
-
-1. **Build Streamlit interface**
-
-   * Input: user question
-   * Output:
-
-     * Final answer (with PMIDs)
-     * Evidence table (sentences, scores)
-     * Graph visualization (pyvis/NetworkX)
-
-2. **Evaluation**
-
-   * Quantitative:
-
-     * **Answer accuracy:** EM & F1 on PubMedQA
-     * **Retrieval quality:** Precision@k
-   * Qualitative:
-
-     * 20 human-rated explanations (relevance & clarity)
-
-3. **Ethical review**
-
-   * Add disclaimer (“not for clinical use”).
-   * Discuss transparency & bias mitigation.
-
-4. **Packaging**
-
-   * Dockerize: `Neo4j`, `ChromaDB`, `Streamlit` containers.
-   * Set up GitHub Actions for CI/CD (test → build → deploy).
-
-5. **Presentation assets**
-
-   * Demo video (Streamlit walkthrough).
-   * Report diagrams (architecture + workflow).
-
-### 📦 **Deliverables**
-
-* Streamlit explainable QA app
-* Evaluation metrics table + graphs
-* Dockerized system
-* Final report & slides
-
-### 🧰 **Key Tools**
-
-`Streamlit`, `networkx`, `matplotlib`, `Docker`, `GitHub Actions`
-
----
-
-## 📊 **Sprint-wise Deliverables Summary**
-
-| Sprint | Key Output                   | Verification                                           |
-| ------ | ---------------------------- | ------------------------------------------------------ |
-| 1      | Clean data + entity mappings | Coverage ≥ 80 %, correct canonical IDs                 |
-| 2      | Neo4j graph                  | Valid `Drug–Disease–Gene` edges, graph queries succeed |
-| 3      | RAG + Agents                 | JSON answers include citations & graph paths           |
-| 4      | UI + Evaluation              | App usable, metrics reported, Docker build runs        |
-
----
-
-## 🧩 **Timeline at a Glance**
+A clean folder layout was initialized:
 
 ```
-Weeks 1–2 → Sprint 1  (Data & Mapping)
-Weeks 3–4 → Sprint 2  (Graph DB)
-Weeks 5–6 → Sprint 3  (Agents & Retrieval)
-Weeks 7–8 → Sprint 4  (UI & Evaluation)
+BioGraphX/
+├── data/
+│   ├── raw/
+│   └── processed/
+├── notebooks/
+├── etl/
+├── graph/
+├── rag/
+├── agents/
+├── training/
+├── models/
+├── app/
+└── configs/
 ```
 
+### ✔ Create & activate virtual environment
+
+```bash
+python -m venv venv
+source venv/bin/activate        # macOS/Linux
+# or
+venv\Scripts\activate           # Windows
+```
+
+### ✔ Install all dependencies
+
+```bash
+pip install --upgrade pip
+pip install -r requirements.txt
+```
+
+This installs:
+
+* PyTorch, Transformers
+* spaCy, SciSpaCy
+* Neo4j + Py2Neo
+* ChromaDB + FAISS
+* LangChain + LangGraph
+* Streamlit
+* Evaluation tools
+
 ---
 
-## 🧠 **Tips for Success**
+## ✅ **2. Raw Dataset Download**
 
-* **Work incrementally:** test each module standalone before chaining.
-* **Track provenance:** store dataset name & PMID in every edge.
-* **Document decisions:** keep `README.md` for every script.
-* **Automate small samples first** — scale later.
-* **End each sprint with a short demo** (Jupyter notebook or UI prototype).
+All raw datasets from Kaggle were downloaded manually and placed under:
 
+```
+data/raw/
+```
 
-Chatgpt Chat- https://chatgpt.com/share/6913ede5-d3dc-8012-b77e-0c34f4e5568a
+### Included datasets:
+
+* `medquad.csv` – Main biomedical Q/A dataset
+* `pubmed_abstracts.csv` – Corpus for evidence retrieval
+* `pubmed_qa_pga_labeled.parquet` – Evaluation dataset
+* `pubmed_qa_pga_artificial.parquet` – Supplemental PubMed QA data
+
+These datasets will be cleaned, processed, embedded, and graph-linked in later sprints.
 
 ---
 
-Would you like me to generate a **visual Gantt-style sprint timeline** (as a diagram or PDF) showing all four sprints, their dependencies, and deliverables? It’s great for inclusion in a final report or presentation.
+## ✅ **3. Biomedical Model Installation & Verification**
+
+The SciSpaCy biomedical NER model was installed using:
+
+```bash
+python scripts/install_embedding_model.py
+```
+
+or manual fallback:
+
+```bash
+pip install https://s3-us-west-2.amazonaws.com/ai2-s-scip...
+```
+
+### ✔ Successful model load test
+
+```python
+import spacy
+nlp = spacy.load("en_ner_bc5cdr_md")
+doc = nlp("Acetaminophen reduces fever and pain.")
+print([(ent.text, ent.label_) for ent in doc.ents])
+```
+
+**Result:**
+Entities such as CHEMICAL and DISEASE were correctly detected.
+
+This confirms that the biomedical NLP stack is ready for Sprint 2.
+
+---
+
+## ✅ **4. EDA Notebook Created**
+
+The required EDA notebook has been created at:
+
+```
+notebooks/01_eda_medquad.ipynb
+```
+
+### Notebook contents include:
+
+* Loading `medquad.csv`
+* `df.head()`, structural inspection
+* Random sample Q/A pairs
+* Missing value analysis
+* Question/answer length distributions
+* Optional: Test biomedical NER model inside the notebook
+
+This validates dataset integrity and prepares for cleaning + entity extraction in Sprint 2.
+
+---
+
+# 🟩 **Sprint 1 Summary**
+
+Sprint 1 goals were fully achieved:
+
+| Deliverable                           | Status |
+| ------------------------------------- | ------ |
+| Project structure initialized         | ✔      |
+| Virtual environment created           | ✔      |
+| Requirements installed                | ✔      |
+| Kaggle datasets downloaded            | ✔      |
+| EDA notebook created                  | ✔      |
+| SciSpaCy NER model installed & tested | ✔      |
+
+---
+
+# 🚀 **Next Step: Sprint 2**
+
+Sprint 2 will include:
+
+* Data cleaning
+* Biomedical entity extraction
+* Neo4j schema definition
+* Preparing graph node/edge CSVs
+

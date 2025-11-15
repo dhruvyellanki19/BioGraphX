@@ -1,0 +1,97 @@
+# Virtual environments
+.venv/
+venv/
+env/
+.env
+
+# Python cache and build files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Data files - avoid committing large datasets
+data/raw/
+data/processed/
+*.parquet
+*.csv
+*.json
+*.pkl
+*.h5
+*.hdf5
+
+# Model files and checkpoints
+models/fine_tuned/
+models/*.pt
+models/*.pth
+models/*.bin
+models/*.safetensors
+*.model
+checkpoints/
+
+# Logs and temporary files
+logs/
+*.log
+.logs/
+temp/
+tmp/
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Environment variables and secrets
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+*.key
+*.pem
+config.ini
+secrets.json
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Neo4j database files
+neo4j/
+
+# ChromaDB files
+chroma_db/
+
+# Streamlit secrets
+.streamlit/secrets.toml
