@@ -73,6 +73,8 @@ Thumbs.db
 
 # Environment variables and secrets
 .env
+.env.*
+*.env
 .env.local
 .env.development.local
 .env.test.local
@@ -82,16 +84,29 @@ Thumbs.db
 config.ini
 secrets.json
 
+# API Keys and tokens
+**/secrets/
+**/tokens/
+**/*_token*
+**/*_key*
+**/*secret*
+**/*password*
+
 # Database files
 *.db
 *.sqlite
 *.sqlite3
 
-# Neo4j database files
-neo4j/
+# Neo4j database files and data
+neo4j/data/
+neo4j/logs/
+neo4j/plugins/
+*.neo4j
 
-# ChromaDB files
+# ChromaDB files and vector database
 chroma_db/
+data/chroma/
+*.chroma
 
 # Streamlit secrets
 .streamlit/secrets.toml
