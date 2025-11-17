@@ -1,0 +1,40 @@
+# Core
+pandas
+numpy
+tqdm
+
+# NLP / Models
+transformers
+sentence-transformers
+datasets
+
+# Biomedical NER
+spacy
+scispacy
+
+# Retrieval / Vector Store
+chromadb
+faiss-cpu
+
+# Graph
+neo4j
+py2neo
+networkx
+
+# Training & Fine-tuning
+torch
+accelerate
+peft
+bitsandbytes
+
+# UI & Viz
+streamlit
+pyvis
+matplotlib
+seaborn
+
+# Testing / Eval
+pytest
+pytest-cov
+evaluate
+rouge-score
