@@ -9,6 +9,7 @@ BioGraphX is a biomedical question-answering system that integrates NLP, knowled
 ### 1. Project Structure Setup
 A clean, modular repository structure has been created:
 
+```
 BioGraphX/
 │
 ├── data/
@@ -26,7 +27,7 @@ BioGraphX/
 │
 ├── requirements.txt   # full environment dependencies
 └── README.md
-
+```
 
 
 Many folders are empty for now—they will be filled during their respective sprints.  
@@ -52,13 +53,13 @@ All required libraries were installed, including:
 
 ### 3. Dataset Preparation
 The following Kaggle datasets were manually downloaded and placed inside:
-
+```
 data/raw/
     medquad.csv
     pubmed_abstracts.csv
     pubmed_qa_pqa_labeled.parquet
     pubmed_qa_pqa_artificial.parquet
-
+```
 
 A `.gitignore` file was configured to ensure raw datasets and large files are never pushed to GitHub.
 
