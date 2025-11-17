@@ -3,3 +3,12 @@ __pycache__/
 .ipynb_checkpoints/
 data/raw/
 models/
+data/raw/*
+*.tar.gz
+*.whl
+*.zip
+*.bin
+*.pickle
+*.jsonl
+data/processed/medquad_entities.jsonl
+data/processed/medquad_with_entities.csv

@@ -91,15 +91,95 @@ The insights from this EDA will guide data cleaning, NER extraction, and knowled
 - Successful commit and push of Sprint 1 work
 
 ---
+## Completed Work (Sprint 1)
 
-## Next Steps (Sprint 2)
-Sprint 2 will focus on:
+## Sprint 2 — Biomedical NER and Entity Normalization
 
-1. Cleaning MedQuAD (`etl/clean_medquad.py`)
-2. Running SciSpaCy NER over questions and answers
-3. Designing the Neo4j knowledge graph schema
-4. Generating node and edge CSVs for graph import
-
-This will convert MedQuAD into a structured biomedical knowledge graph, forming the backbone for RAG and multi-agent reasoning.
+### Objectives
+Sprint 2 focuses on extracting biomedical entities (diseases and chemicals) from the MedQuAD dataset and preparing structured data for graph construction. This includes NER model setup, entity extraction, normalization, vocabulary creation, and generating Neo4j-ready CSV files.
 
 ---
+
+## 1. Biomedical NER Model Setup
+A compatible biomedical NER model (BC5CDR) was manually downloaded and installed, since ScispaCy no longer provides public model URLs.
+
+**Installed model:**  
+`en_ner_bc5cdr_md-0.5.1`
+
+**Verification script:**  
+`Scripts/test_bc5cdr_model.py`
+
+---
+
+## 2. Entity Extraction from MedQuAD
+**Script:**  
+`Scripts/extract_medquad_entities.py`
+
+**Outputs:**
+- `data/processed/medquad_entities.jsonl`
+- `data/processed/medquad_with_entities.csv`
+
+Each row now contains:
+
+{
+"diseases": [...],
+"chemicals": [...]
+}
+
+
+---
+
+## 3. Entity Normalization
+**Script:**  
+`Scripts/normalize_medquad_entities.py`
+
+Normalization steps applied:
+- lowercase conversion  
+- trimming whitespace  
+- punctuation removal  
+- deduplication  
+- consistent formatting  
+
+**Output:**  
+`data/processed/medquad_with_entities_normalized.csv`
+
+---
+
+## 4. Global Vocabulary Extraction
+**Script:**  
+`Scripts/generate_unique_entities.py`
+
+**Outputs:**
+- `data/processed/unique_diseases.txt`
+- `data/processed/unique_chemicals.txt`
+
+These files contain the canonical biomedical vocabulary needed for graph node creation.
+
+---
+
+## 5. Neo4j Ingestion File Preparation
+**Script:**  
+`Scripts/prepare_neo4j_medquad.py`
+
+This script converts normalized entity data into Neo4j-ready CSV files.
+
+**Generated node files:**
+- `nodes_diseases.csv`
+- `nodes_chemicals.csv`
+- `nodes_questions.csv`
+
+**Generated relationship files:**
+- `rels_question_disease.csv`
+- `rels_question_chemical.csv`
+
+All files comply with the Neo4j bulk import format (`:ID`, `:START_ID`, `:END_ID`, `:TYPE`).
+
+---
+
+## Sprint 2 Summary
+- Biomedical NER pipeline built and verified  
+- Entities extracted and normalized  
+- Global vocabularies generated  
+- Neo4j nodes and relationship CSVs produced  
+- All scripts modular and ready for Sprint 3
+
