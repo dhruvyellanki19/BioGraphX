@@ -1,40 +1,42 @@
 # Core
-pandas
-numpy
-tqdm
+pandas==2.1.4
+numpy==1.26.4
+tqdm==4.66.4
 
 # NLP / Models
-transformers
-sentence-transformers
-datasets
+transformers==4.39.3
+sentence-transformers==2.7.0
+datasets==2.18.0
 
 # Biomedical NER
-spacy
-scispacy
+spacy==3.6.1
+scispacy==0.5.3
+# Install model separately:
+# pip install https://s3-us-west-2.amazonaws.com/ai2-s2-scispacy/releases/en_ner_bc5cdr_md-0.5.3.tar.gz
 
 # Retrieval / Vector Store
-chromadb
-faiss-cpu
+chromadb==0.4.22
+faiss-cpu==1.7.4
 
 # Graph
-neo4j
-py2neo
-networkx
+neo4j==5.17.0
+py2neo==2021.2.4
+networkx==3.2.1
 
-# Training & Fine-tuning
-torch
-accelerate
-peft
-bitsandbytes
+# Training / Fine-tuning
+torch==2.1.0
+accelerate==0.30.1
+peft==0.10.0
+bitsandbytes==0.42.0
 
-# UI & Viz
-streamlit
-pyvis
-matplotlib
-seaborn
+# UI & Visualization
+streamlit==1.32.0
+pyvis==0.3.2
+matplotlib==3.8.2
+seaborn==0.13.2
 
 # Testing / Eval
-pytest
-pytest-cov
-evaluate
-rouge-score
+pytest==8.1.1
+pytest-cov==4.1.0
+evaluate==0.4.1
+rouge-score==0.1.2

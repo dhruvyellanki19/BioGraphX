@@ -1,14 +1,32 @@
 .venv/
 __pycache__/
 .ipynb_checkpoints/
+.DS_Store
+data/.DS_Store
+
+# Data artifacts (keep local; do not push)
 data/raw/
-models/
 data/raw/*
+data/processed/*.parquet
+data/processed/*embeddings*
+data/vectorstore/
+data/vectorstore_pubmed/
+
+# Model/adapter artifacts
+models/
+llm/outputs/
+
+# Binary/distribution noise
 *.tar.gz
 *.whl
 *.zip
 *.bin
 *.pickle
 *.jsonl
+
+# Specific processed files
 data/processed/medquad_entities.jsonl
 data/processed/medquad_with_entities.csv
+
+# Neo4j credentials
+.env
