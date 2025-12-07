@@ -553,7 +553,6 @@ This project is for educational and research purposes.
 ## Acknowledgments
 
 - **SciSpaCy**: Biomedical NLP models
-- **Qwen**: Base language model
 - **ChromaDB**: Vector database
 - **HuggingFace**: Transformers library
 - **MedQuAD**: Training dataset
