@@ -1,3 +1,8 @@
+# Core Dependencies - Install pydantic v2 FIRST
+pydantic==2.12.4
+pydantic-core==2.41.5
+pydantic-settings==2.12.0
+
 # Core Data & Utilities
 pandas>=2.0.0
 numpy>=1.24.0
@@ -8,8 +13,8 @@ nltk>=3.8.0
 python-dotenv>=1.0.0
 
 # Biomedical NLP & NER
-spacy>=3.4.0,<3.8.0
-scispacy>=0.5.1
+spacy==3.7.5
+scispacy==0.6.2
 
 # HuggingFace Ecosystem
 torch>=2.0.0
@@ -18,23 +23,24 @@ datasets>=2.10.0
 sentence-transformers>=2.2.0
 accelerate>=0.20.0
 peft>=0.4.0
-bitsandbytes>=0.40.0
+bitsandbytes>=0.42.0
 tokenizers>=0.13.0
 
 # Vector Store & Retrieval
-chromadb>=0.4.0
+chromadb==1.3.5
 faiss-cpu>=1.7.0
 
-# Knowledge Graph Tools
-neo4j>=5.0.0
-py2neo>=2021.2.0
-networkx>=3.0.0
+# Wikipedia Integration
+wikipedia>=1.4.0
 
 # Agentic AI Framework
-pydantic>=2.7.4,<3.0.0
 langchain>=0.1.0
 langchain-community>=0.0.20
 langgraph>=0.0.40
+
+# Web Framework
+flask>=2.3.0
+flask-cors>=4.0.0
 
 # UI & Visualization
 streamlit>=1.25.0
@@ -47,3 +53,5 @@ evaluate>=0.4.0
 rouge-score>=0.1.0
 scikit-learn>=1.3.0
 umap-learn>=0.5.0
+rapidfuzz
+bert-score

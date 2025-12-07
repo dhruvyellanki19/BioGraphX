@@ -1,341 +1,569 @@
+# BioGraphX - Biomedical AI Question Answering System
 
-# 📘 **BioGraphX — Sprint 1, 2 & 3 Complete**
-
-## 🧬 Project Overview
-
-**BioGraphX** is an end-to-end *Graph-Augmented, Agentic Biomedical Question-Answering System*.
-It integrates:
-
-* A Neo4j biomedical knowledge graph
-* SciSpaCy-based biomedical entity extraction  
-* BioBERT/SciBERT embedding-based retrieval
-* ChromaDB vector database for semantic search
-* Ollama LLM integration for answer generation
-* Complete RAG (Retrieval-Augmented Generation) pipeline
-* A Streamlit interface for interpretable QA
-
-This README documents **Sprint 1, 2 & 3 completion** with actual deliverables achieved.
+**An intelligent multi-agent system for biomedical question answering powered by retrieval-augmented generation, knowledge graphs, and fine-tuned language models.**
 
 ---
 
-# 🟦 **Sprint 1 — Project Bootstrapping & Data Download**
+## Table of Contents
 
-Sprint 1 focuses entirely on **setting up the environment**, **downloading datasets**, and **performing initial exploration (EDA)**.
-No modeling, extraction, or graph construction happens yet.
+- [Problem Statement](#problem-statement)
+- [Solution Overview](#solution-overview)
+- [System Architecture](#system-architecture)
+- [Key Features](#key-features)
+- [Technology Stack](#technology-stack)
+- [Quick Start](#quick-start)
+- [Project Structure](#project-structure)
+- [Usage](#usage)
+- [Documentation](#documentation)
 
 ---
 
-## ✅ **1. Repository & Environment Setup**
+## Problem Statement
 
-### ✔ Create project structure
+### The Challenge
 
-A clean folder layout was initialized:
+Biomedical question answering presents unique challenges:
+
+1. **Complex Terminology**: Medical terms require precise entity extraction and normalization
+2. **Multiple Knowledge Sources**: Answers need integration of research literature, knowledge graphs, and general medical knowledge
+3. **Evidence Requirements**: Medical answers must be grounded in scientific evidence with proper citations
+4. **Domain Expertise**: General-purpose language models lack specialized biomedical knowledge
+5. **Entity Relationships**: Understanding connections between diseases, drugs, and treatments requires structured knowledge
+
+### The Gap
+
+Existing biomedical QA systems typically:
+- Rely on single knowledge sources (either literature OR knowledge graphs, not both)
+- Use general-purpose models without domain-specific fine-tuning
+- Lack sophisticated entity extraction and normalization
+- Don't provide transparent reasoning or evidence trails
+- Are difficult to deploy and scale
+
+---
+
+## Solution Overview
+
+**BioGraphX** addresses these challenges through a sophisticated multi-agent architecture that combines:
+
+- **7 Specialized Agents** working in concert to process questions, extract entities, retrieve evidence, and generate answers
+- **Retrieval-Augmented Generation (RAG)** with 298,000+ indexed PubMed documents
+- **Fine-tuned Qwen2.5-1.5B Model** trained on 14,724 biomedical Q&A pairs
+- **Entity Normalization** using fuzzy matching against 15,723 canonical biomedical terms
+- **Wikipedia Integration** for general medical context
+- **Interactive Web Interface** for easy access
+- **Docker Deployment** for reproducible, scalable deployment
+
+### What Makes BioGraphX Unique
+
+1. **Multi-Agent Orchestration**: Each agent specializes in a specific task (entity extraction, normalization, retrieval, generation)
+2. **Dual Knowledge Integration**: Combines vector database retrieval with Wikipedia knowledge
+3. **Domain-Specific Fine-Tuning**: Custom-trained model on biomedical literature
+4. **Evidence-Based Answers**: All responses include PubMed citations and reasoning explanations
+5. **Production-Ready**: Fully containerized with Docker for easy deployment
+
+---
+
+## System Architecture
+
+### High-Level Architecture
+
+```
+User Question
+     |
+     v
+[QuestionAgent] --> Extract biomedical entities (SciSpaCy)
+     |
+     v
+[NormalizeAgent] --> Normalize entities (fuzzy matching)
+     |
+     v
+[WikipediaAgent] --> Retrieve general medical knowledge
+     |
+     v
+[RetrieverAgent] --> Search 298K PubMed documents (ChromaDB)
+     |
+     v
+[QAModelAgent] --> Generate answer (Fine-tuned Qwen2.5-1.5B)
+     |
+     v
+[EvidenceAgent] --> Format evidence with citations
+     |
+     v
+[ExplanationAgent] --> Compile final response
+     |
+     v
+Final Answer with Evidence
+```
+
+### Core Components
+
+#### 1. Multi-Agent Pipeline (agents/)
+- **QuestionAgent**: Biomedical NER using SciSpaCy's `en_ner_bc5cdr_md` model
+- **NormalizeAgent**: Entity normalization via RapidFuzz (70% similarity threshold)
+- **WikipediaAgent**: Medical article retrieval for general context
+- **RetrieverAgent**: Semantic search over PubMed abstracts (ChromaDB + all-mpnet-base-v2)
+- **QAModelAgent**: Answer generation using fine-tuned Qwen2.5-1.5B-Instruct
+- **EvidenceAgent**: Evidence formatting and citation management
+- **ExplanationAgent**: Final response compilation with reasoning
+
+#### 2. RAG Pipeline (rag/)
+- **Vector Database**: ChromaDB with 298,152 PubMed sentences
+- **Embeddings**: Sentence-Transformers (all-mpnet-base-v2, 768-dimensional)
+- **Retrieval**: Top-K semantic similarity search
+- **Evidence Integration**: Context-aware answer generation
+
+#### 3. Fine-Tuned Model (training/)
+- **Base Model**: Qwen/Qwen2.5-1.5B-Instruct
+- **Training Data**: 14,724 MedQuAD biomedical Q&A pairs
+- **Method**: LoRA (Low-Rank Adaptation) for parameter-efficient fine-tuning
+- **Performance**: Domain-specific biomedical understanding
+
+#### 4. Web Application (app/)
+- **Framework**: Flask with CORS support
+- **Interface**: ChatGPT-style dark theme UI
+- **Features**: Real-time processing, collapsible evidence panels, interactive display
+- **API**: RESTful endpoints for question answering
+
+#### 5. Docker Deployment
+- **Containerization**: Complete application in Docker
+- **Port**: 1919 (host) -> 5000 (container)
+- **Data Persistence**: Volume mounts for ChromaDB and models
+- **Health Checks**: Automated monitoring
+
+---
+
+## Key Features
+
+### Intelligent Question Processing
+- Automatic biomedical entity extraction from natural language questions
+- Entity normalization against canonical medical vocabulary
+- Context-aware query expansion
+
+### Multi-Source Knowledge Integration
+- **PubMed Literature**: 298,152 indexed research abstracts
+- **Wikipedia**: General medical knowledge and context
+- **Fine-tuned Model**: Domain-specific biomedical understanding
+
+### Evidence-Based Answers
+- All answers grounded in retrieved scientific literature
+- PMID citations for research papers
+- Transparent reasoning explanations
+- Source attribution
+
+### Advanced NLP Pipeline
+- **SciSpaCy**: Biomedical named entity recognition
+- **Sentence Transformers**: Semantic embeddings
+- **Qwen2.5-1.5B**: State-of-the-art language model
+- **LoRA Fine-Tuning**: Efficient domain adaptation
+
+### Production-Ready Deployment
+- Docker containerization for reproducibility
+- Automated health checks
+- Data persistence
+- Scalable architecture
+- Easy deployment across platforms
+
+### Interactive Web Interface
+- Modern, responsive UI
+- Real-time question processing
+- Collapsible evidence panels
+- Agent analysis visualization
+- Wikipedia context display
+
+---
+
+## Technology Stack
+
+### Core Technologies
+- **Python 3.10**: Primary programming language
+- **PyTorch**: Deep learning framework
+- **Transformers**: HuggingFace library for LLMs
+
+### Biomedical NLP
+- **SciSpaCy 0.6.2**: Biomedical NER
+- **en_ner_bc5cdr_md**: Disease and chemical entity recognition
+- **RapidFuzz**: Fuzzy string matching for entity normalization
+
+### Vector Database & Retrieval
+- **ChromaDB 1.3.5**: Vector database
+- **Sentence-Transformers**: Embedding generation
+- **FAISS**: Efficient similarity search
+
+### Language Models
+- **Qwen2.5-1.5B-Instruct**: Base model
+- **PEFT**: Parameter-efficient fine-tuning
+- **LoRA**: Low-rank adaptation
+
+### Web Framework
+- **Flask 2.3+**: Web application framework
+- **Flask-CORS**: Cross-origin resource sharing
+
+### Data Processing
+- **Pandas**: Data manipulation
+- **NumPy**: Numerical computing
+- **NLTK**: Natural language processing
+
+### Deployment
+- **Docker**: Containerization
+- **Docker Compose**: Multi-container orchestration
+
+---
+
+## Quick Start
+
+### Prerequisites
+
+- **Docker** (20.10+) and **Docker Compose** (2.0+)
+- **8GB+ RAM** recommended
+- **10GB+ disk space** for models and data
+
+### Running with Docker (Recommended)
+
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd BioGraphX
+   ```
+
+2. **Start the application**
+   ```bash
+   docker-compose up -d
+   ```
+
+3. **Access the web interface**
+   ```
+   http://localhost:1919
+   ```
+
+4. **Check health status**
+   ```bash
+   curl http://localhost:1919/health
+   ```
+
+### Running Locally (Development)
+
+1. **Create virtual environment**
+   ```bash
+   python -m venv venv
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   ```
+
+2. **Install dependencies**
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+3. **Download SciSpaCy model**
+   ```bash
+   pip install https://s3-us-west-2.amazonaws.com/ai2-s2-scispacy/releases/v0.5.4/en_ner_bc5cdr_md-0.5.4.tar.gz
+   ```
+
+4. **Download NLTK data**
+   ```bash
+   python -m nltk.downloader punkt punkt_tab stopwords
+   ```
+
+5. **Run the application**
+   ```bash
+   cd app
+   python run.py
+   ```
+
+6. **Access at** `http://localhost:8989`
+
+---
+
+## Project Structure
 
 ```
 BioGraphX/
-├── data/
-│   ├── raw/
-│   └── processed/
-├── notebooks/
-├── etl/
-├── graph/
-├── rag/
-├── agents/
-├── training/
-├── models/
-├── app/
-└── configs/
+├── agents/                          # Multi-agent pipeline
+│   ├── __init__.py                 # Agent package initialization
+│   ├── agent_graph_orchestrator.py # Main pipeline coordinator
+│   ├── question_agent.py           # Entity extraction (SciSpaCy)
+│   ├── normalize_agent.py          # Entity normalization
+│   ├── wikipedia_agent.py          # Wikipedia retrieval
+│   ├── retriever_agent.py          # ChromaDB vector search
+│   ├── qa_model_agent.py           # Answer generation (Qwen)
+│   ├── evidence_agent.py           # Evidence formatting
+│   └── explanation_agent.py        # Final response compilation
+│
+├── app/                            # Flask web application
+│   ├── main.py                     # API endpoints
+│   ├── pipeline_wrapper.py         # Pipeline integration
+│   ├── run.py                      # Application launcher
+│   ├── templates/                  # HTML templates
+│   └── static/                     # CSS and JavaScript
+│
+├── data/                           # Data storage
+│   ├── raw/                        # Raw datasets
+│   ├── processed/                  # Processed data
+│   └── chroma/                     # ChromaDB vector database
+│
+├── etl/                            # Data processing scripts
+│   ├── prepare_pubmed_sentences.py # PubMed data processing
+│   └── clean_pubmedqa.py           # Dataset cleaning
+│
+├── rag/                            # RAG pipeline
+│   ├── embed_pubmed.py             # Vector database creation
+│   ├── query_pipeline.py           # Retrieval system
+│   ├── build_index.py              # Index construction
+│   └── test_retriever.py           # Testing utilities
+│
+├── training/                       # Model training
+│   ├── prepare_medquad_dataset.py  # Dataset preparation
+│   ├── finetune_qa_model.py        # Qwen fine-tuning
+│   ├── merge_lora.py               # LoRA model merging
+│   └── eval_pubmedqa.py            # Model evaluation
+│
+├── models/                         # Trained models
+│   └── fine_tuned/                 # Fine-tuned Qwen model
+│
+├── scripts/                        # Utility scripts
+│   ├── run_pipeline.py             # CLI interface
+│   └── install_embedding_model.py  # Model installation
+│
+├── notebooks/                      # Jupyter notebooks
+│   └── 01_eda_medquad.ipynb       # Data exploration
+│
+├── Dockerfile                      # Docker image definition
+├── docker-compose.yaml             # Docker orchestration
+├── requirements.txt                # Python dependencies
+├── start-docker.sh                 # Docker startup script
+└── README.md                       # This file
 ```
 
-### ✔ Create & activate virtual environment
+---
+
+## Usage
+
+### Web Interface
+
+1. Navigate to `http://localhost:1919`
+2. Enter your biomedical question in the chat interface
+3. View the AI-generated answer with:
+   - Wikipedia context
+   - PubMed evidence with citations
+   - Reasoning explanation
+
+### Command-Line Interface
 
 ```bash
-python -m venv venv
-source venv/bin/activate        # macOS/Linux
-# or
-venv\Scripts\activate           # Windows
+python scripts/run_pipeline.py
 ```
 
-### ✔ Install all dependencies
+Then enter your questions interactively.
 
+### API Endpoints
+
+**Health Check**
 ```bash
-pip install --upgrade pip
-pip install -r requirements.txt
+GET /health
 ```
 
-This installs:
-
-* PyTorch, Transformers
-* spaCy, SciSpaCy
-* Neo4j + Py2Neo
-* ChromaDB + FAISS
-* LangChain + LangGraph
-* Streamlit
-* Evaluation tools
-
----
-
-## ✅ **2. Raw Dataset Download**
-
-All raw datasets from Kaggle were downloaded manually and placed under:
-
-```
-data/raw/
-```
-
-### Included datasets:
-
-* `medquad.csv` – Main biomedical Q/A dataset
-* `pubmed_abstracts.csv` – Corpus for evidence retrieval
-* `pubmed_qa_pga_labeled.parquet` – Evaluation dataset
-* `pubmed_qa_pga_artificial.parquet` – Supplemental PubMed QA data
-
-These datasets will be cleaned, processed, embedded, and graph-linked in later sprints.
-
----
-
-## ✅ **3. Biomedical Model Installation & Verification**
-
-The SciSpaCy biomedical NER model was installed using:
-
+**Ask Question**
 ```bash
-python scripts/install_embedding_model.py
+POST /ask
+Content-Type: application/json
+
+{
+  "question": "What are the symptoms of diabetes?"
+}
 ```
 
-or manual fallback:
-
-```bash
-pip install https://s3-us-west-2.amazonaws.com/ai2-s-scip...
+**Response Format**
+```json
+{
+  "answer": "Evidence-based answer...",
+  "entities": ["diabetes"],
+  "evidence": [
+    {
+      "pmid": "12345",
+      "text": "Research finding..."
+    }
+  ],
+  "wikipedia": "General medical context...",
+  "explanation": "Reasoning process...",
+  "status": "success"
+}
 ```
-
-### ✔ Successful model load test
-
-```python
-import spacy
-nlp = spacy.load("en_ner_bc5cdr_md")
-doc = nlp("Acetaminophen reduces fever and pain.")
-print([(ent.text, ent.label_) for ent in doc.ents])
-```
-
-**Result:**
-Entities such as CHEMICAL and DISEASE were correctly detected.
-
-This confirms that the biomedical NLP stack is ready for Sprint 2.
 
 ---
 
-## ✅ **4. EDA Notebook Created**
+## Documentation
 
-The required EDA notebook has been created at:
-
-```
-notebooks/01_eda_medquad.ipynb
-```
-
-### Notebook contents include:
-
-* Loading `medquad.csv`
-* `df.head()`, structural inspection
-* Random sample Q/A pairs
-* Missing value analysis
-* Question/answer length distributions
-* Optional: Test biomedical NER model inside the notebook
-
-This validates dataset integrity and prepares for cleaning + entity extraction in Sprint 2.
+- **[IMPLEMENTATION_GUIDE.md](IMPLEMENTATION_GUIDE.md)**: Detailed file-by-file explanation and step-by-step setup guide
+- **[Dockerfile](Dockerfile)**: Docker image configuration
+- **[docker-compose.yaml](docker-compose.yaml)**: Container orchestration
 
 ---
 
-# 🟩 **Sprint 1 Summary — COMPLETED**
+## Performance
 
-Sprint 1 goals were fully achieved:
-
-| Deliverable                           | Status | Details |
-| ------------------------------------- | ------ | ------- |
-| Project structure initialized         | ✅     | Clean folder hierarchy created |
-| Virtual environment created           | ✅     | Python 3.10 with all dependencies |
-| Requirements installed                | ✅     | 49 packages including ML/NLP stack |
-| Kaggle datasets downloaded            | ✅     | MedQuAD: 16,412 Q/A pairs |
-| EDA notebook created                  | ✅     | Comprehensive analysis with statistics |
-| SciSpaCy NER model installed & tested | ✅     | en_ner_bc5cdr_md working perfectly |
-
----
-
-# 🟦 **Sprint 2 — Data Processing & Graph Construction**
-
-## ✅ **Sprint 2 Summary — COMPLETED & EXCEEDED EXPECTATIONS**
-
-### 🎯 **Original Goals Met:**
-- **Data Cleaning**: ✅ MedQuAD cleaned and processed
-- **Entity Extraction**: ✅ Biomedical NER pipeline implemented
-- **Graph Schema**: ✅ Neo4j constraints and relationships defined  
-- **Graph Data Preparation**: ✅ CSV files ready for Neo4j import
-
-### 🚀 **Achievements Beyond Original Plan:**
-
-#### **📊 Massive Entity Extraction Success:**
-- **182,775 biomedical entities** extracted from medical text
-- **High-quality NER** using SciSpaCy's en_ner_bc5cdr_md model
-- **Robust text processing** with NaN handling and batch optimization
-
-#### **🏗️ Complete Graph Structure Built:**
-```
-Graph Data Generated:
-├── 16,360 Question nodes (from MedQuAD Q/A pairs)
-├── 17,937 Disease nodes (extracted from medical text)  
-├── 2,351 Drug/Chemical nodes (pharmaceuticals identified)
-└── 182,776 ABOUT relationships (questions linked to entities)
-```
-
-#### **🔧 Production-Ready ETL Pipeline:**
-- **`etl/extract_entities.py`**: Scalable NER processing with batching
-- **`etl/build_graph_csvs.py`**: Graph data preparation for Neo4j
-- **`graph/schema.cql`**: Database constraints and relationship patterns
-- **Error handling**: Robust text cleaning and validation
-
-#### **📈 Data Quality Metrics:**
-- **16,412 medical Q/A pairs** processed successfully
-- **Zero data loss** through careful NaN handling
-- **Entity coverage**: Diseases (17,937) + Drugs (2,351) = 20,288 unique entities
-- **Relationship density**: 11.1 entities per question on average
-
-### 📁 **Generated Artifacts:**
-```
-data/processed/
-├── medquad_clean.csv          # Cleaned Q/A dataset (21.5MB)
-├── entity_mappings.csv        # All extracted entities (5.5MB)
-└── graph_data/
-    ├── nodes_question.csv     # Question nodes for Neo4j
-    ├── nodes_disease.csv      # Disease entities  
-    ├── nodes_drug.csv         # Drug/Chemical entities
-    └── rels_about.csv         # Question-Entity relationships
-```
-
-### 🧰 **Technical Stack Validated:**
-- **SciSpaCy NER**: en_ner_bc5cdr_md model performing excellently
-- **Pandas**: Efficient data processing of large datasets
-- **Neo4j Schema**: Optimized for biomedical knowledge representation
-- **Batch Processing**: Memory-efficient pipeline handling 180K+ entities
-
----
-
-# 🚀 **Sprint 3 — RAG Pipeline & LLM Integration — COMPLETED**
-
-## ✅ **Sprint 3 Summary — FULLY OPERATIONAL RAG SYSTEM**
-
-### 🎯 **All Original Goals Achieved:**
-- **Vector Database**: ✅ ChromaDB with biomedical embeddings
-- **Graph Integration**: ✅ Neo4j knowledge graph queries  
-- **RAG Pipeline**: ✅ Complete evidence retrieval and synthesis
-- **LLM Integration**: ✅ Ollama with llama3.1:8b model
-
-### 🚀 **Sprint 3 Achievements:**
-
-#### **🗄️ Vector Database Implementation:**
-- **ChromaDB**: Persistent vector store with **298,152 indexed sentences**
-- **Sentence Transformers**: all-mpnet-base-v2 model (768-dimensional embeddings)
-- **Biomedical Content**: PubMed abstracts processed and indexed
-- **Semantic Search**: Efficient similarity-based evidence retrieval
-
-#### **🧠 Complete RAG Pipeline:**
-```
-Query Flow:
-1. Question retrieval from Neo4j graph database
-2. Entity extraction through graph relationships  
-3. Evidence retrieval from ChromaDB vector store
-4. Context-aware answer generation with Ollama LLM
-```
-
-#### **🔗 Knowledge Graph Integration:**
-- **Real-time Queries**: Questions sourced directly from Neo4j (not CSV files)
-- **Entity Relationships**: Dynamic extraction of related diseases/drugs
-- **Graph-Augmented Retrieval**: Entities enhance evidence search queries
-- **36,644 nodes**: Questions, diseases, and drugs interconnected
-
-#### **🤖 LLM Integration & Answer Generation:**
-- **Ollama Framework**: Local LLM deployment with llama3.1:8b model
-- **Prompt Engineering**: Context-aware biomedical question answering
-- **Evidence Synthesis**: Citations and source attribution (PMID references)
-- **Controlled Generation**: Factual answers based on retrieved evidence
-
-#### **📊 Performance Metrics:**
+- **Response Time**: 5-8 seconds for complex biomedical questions
 - **Vector Search**: Sub-second retrieval from 298K+ documents
-- **Graph Queries**: Real-time entity extraction from knowledge graph
-- **End-to-End Latency**: Complete question answering in seconds
-- **Answer Quality**: LLM responses grounded in biomedical evidence
-
-### 🔧 **Technical Implementation:**
-
-#### **Core RAG Components:**
-```
-rag/
-├── embed_pubmed.py        # Vector database construction
-├── query_pipeline.py      # Complete RAG pipeline
-├── build_index.py         # ChromaDB indexing utilities  
-└── test_retriever.py      # Pipeline validation tests
-```
-
-#### **System Architecture:**
-```mermaid
-graph LR
-    A[User Query] --> B[Neo4j Graph]
-    B --> C[Entity Extraction]
-    C --> D[ChromaDB Search]
-    D --> E[Evidence Retrieval]
-    E --> F[Ollama LLM]
-    F --> G[Final Answer]
-```
-
-#### **Pipeline Validation:**
-- **✅ Neo4j Connection**: Graph database queries operational
-- **✅ ChromaDB Integration**: Vector search with semantic similarity  
-- **✅ Embedding Generation**: 768-dimensional biomedical embeddings
-- **✅ LLM Response**: Contextual answer generation with citations
-- **✅ End-to-End Test**: Complete question answering pipeline
+- **Model Inference**: 3-4 seconds for answer generation
+- **Memory Usage**: 4-6GB RAM (with models loaded)
 
 ---
 
-# 🟩 **Sprint 3 Summary — COMPLETED**
+## Data Sources
 
-Sprint 3 goals were fully achieved:
-
-| Deliverable                           | Status | Details |
-| ------------------------------------- | ------ | ------- |
-| Vector Database (ChromaDB)           | ✅     | 298,152 biomedical sentences indexed |
-| Graph Integration (Neo4j)            | ✅     | Real-time entity and question retrieval |
-| RAG Pipeline Implementation           | ✅     | Complete retrieval-augmented generation |
-| Embedding Model Integration          | ✅     | all-mpnet-base-v2 (768-dimensional) |
-| LLM Integration (Ollama)              | ✅     | llama3.1:8b for answer generation |
-| End-to-End Query Pipeline            | ✅     | Functional biomedical QA system |
-
-### 🧪 **Example Query Execution:**
-
-**Input**: Question ID 42 - "What are the treatments for Paget's disease of bone?"
-
-**Pipeline Results:**
-1. **Neo4j Query**: Retrieved question text and related entities
-2. **Entity Extraction**: ["paget's disease", "bone", "arthritis", "pain"]  
-3. **ChromaDB Search**: 5 relevant biomedical sentences retrieved
-4. **LLM Generation**: Evidence-based answer with PMID citations
-
-**Output**: Comprehensive treatment overview grounded in retrieved literature
+- **MedQuAD**: 16,412 biomedical Q&A pairs for training
+- **PubMed**: 298,152 research abstracts for evidence retrieval
+- **Wikipedia**: General medical knowledge articles
+- **Entity Mappings**: 15,723 canonical biomedical terms
 
 ---
 
-# 🟨 **Next Steps: Sprint 4 — UI & Evaluation**
+### Results: Baseline vs Fine-Tuned
 
-With Sprint 1, 2 & 3 successfully completed, Sprint 4 will focus on:
+| Metric | Baseline (Gemma-2B-IT) | Fine-Tuned (Qwen2.5-1.5B) | Improvement |
+|--------|------------------------|---------------------------|-------------|
+| **ROUGE-1** | 0.2099 | 0.3877 | +84.7% |
+| **ROUGE-L** | 0.1050 | 0.2061 | +96.3% |
+| **METEOR** | 0.1634 | 0.2834 | +73.4% |
+| **Token F1** | 0.2251 | 0.3009 | +33.7% |
+| **BERTScore F1** | 0.7598 | 0.8178 | +7.6% |
 
-### 🎯 **Sprint 4 Goals:**
-- **Streamlit Interface**: Interactive web-based QA system
-- **Multi-Agent Framework**: LangGraph reasoning pipeline enhancement  
-- **Evaluation Framework**: Automated testing and metrics
-- **Performance Optimization**: Query speed and answer quality improvements
+**Note**: Qwen outperforms Gemma on 10 out of 11 metrics
 
-### 🏗️ **Current System Status:**
-- **Knowledge Graph**: ✅ 36,644 nodes with biomedical relationships
-- **Vector Database**: ✅ 298,152 documents indexed for retrieval
-- **RAG Pipeline**: ✅ Complete question answering system operational
-- **LLM Integration**: ✅ Local Ollama deployment with llama3.1:8b model
+### Why Qwen2.5-1.5B for BioGraphX?
 
-**Current Status**: ✅ **Complete RAG System Operational** — Ready for UI development and evaluation!
+After comprehensive evaluation, **Qwen2.5-1.5B-Instruct** was selected as the production model for the RAG system over Gemma-2B-IT due to:
 
+**1. Superior Performance**
+- 84.7% improvement in ROUGE-1 score
+- 96.3% improvement in ROUGE-L score  
+- 73.4% improvement in METEOR score
+- Better medical accuracy and terminology usage
+
+**2. Better Biomedical Understanding**
+- More accurate interpretation of medical concepts
+- Improved handling of disease-drug relationships
+- Better structured responses with clinical detail
+
+**3. Efficient Fine-Tuning**
+- Successfully fine-tuned on 14,724 MedQuAD Q&A pairs
+- LoRA adaptation preserved general knowledge while adding domain expertise
+- Faster convergence during training
+
+**4. Production Readiness**
+- Consistent, high-quality responses
+- Better integration with RAG pipeline
+- Reliable performance across diverse biomedical questions
+
+**Current System**: The BioGraphX RAG pipeline uses the fine-tuned Qwen2.5-1.5B model for all answer generation, providing evidence-based responses with superior accuracy.
+
+## Model Information
+
+### Fine-Tuned Qwen2.5-1.5B
+- **Base**: Qwen/Qwen2.5-1.5B-Instruct
+- **Training**: LoRA fine-tuning on MedQuAD
+- **Parameters**: 1.5B total, 3.6M trainable (0.12%)
+- **Training Data**: 14,724 biomedical Q&A pairs
+- **Epochs**: 2
+- **Location**: `models/fine_tuned/qwen25_1_5b_medquad_merged/`
+
+### SciSpaCy NER Model
+- **Model**: en_ner_bc5cdr_md v0.5.4
+- **Entities**: DISEASE, CHEMICAL
+- **Framework**: spaCy 3.7.5
+
+---
+
+## Docker Deployment
+
+### Container Details
+- **Image**: biographx-biographx-app
+- **Port**: 1919 (host) -> 5000 (container)
+- **Volumes**:
+  - `./data:/app/data` - Data persistence
+  - `./models:/app/models` - Model storage
+  - `./app:/app/app` - Live code updates
+
+### Management Commands
+
+```bash
+# Start application
+docker-compose up -d
+
+# View logs
+docker-compose logs -f
+
+# Stop application
+docker-compose down
+
+# Rebuild image
+docker-compose up --build -d
+
+# Check status
+docker-compose ps
+```
+
+---
+
+## Development
+
+### Adding New Agents
+
+1. Create new agent file in `agents/`
+2. Inherit from base agent pattern
+3. Implement `run(state)` method
+4. Add to `agent_graph_orchestrator.py`
+
+### Modifying the Pipeline
+
+Edit `agents/agent_graph_orchestrator.py` to change agent execution order or add new processing steps.
+
+### Custom Model Training
+
+See `training/finetune_qa_model.py` for fine-tuning your own model on custom datasets.
+
+---
+
+## Troubleshooting
+
+**Container won't start**
+- Check Docker is running
+- Verify port 1919 is available
+- Check logs: `docker-compose logs`
+
+**Out of memory**
+- Increase Docker memory limit to 8GB+
+- Reduce batch size in model configuration
+
+**No evidence retrieved**
+- Verify ChromaDB data exists in `data/chroma/`
+- Check collection has documents: See IMPLEMENTATION_GUIDE.md
+
+**Pipeline initialization fails**
+- Ensure all models are downloaded
+- Check NLTK data is installed
+- Verify SciSpaCy model is present
+
+---
+
+## License
+
+This project is for educational and research purposes.
+
+---
+
+## Acknowledgments
+
+- **SciSpaCy**: Biomedical NLP models
+- **Qwen**: Base language model
+- **ChromaDB**: Vector database
+- **HuggingFace**: Transformers library
+- **MedQuAD**: Training dataset
+
+---
+
+## Contact
+
+For questions and support, please open an issue in the repository.
+
+---
+
+**Built with advanced AI techniques for biomedical question answering**

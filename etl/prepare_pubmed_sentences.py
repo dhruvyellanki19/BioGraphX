@@ -1,21 +1,17 @@
-import csv
+import pandas as pd
 import ast
 from pathlib import Path
-import pandas as pd
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 RAW_PATH = PROJECT_ROOT / "data" / "raw" / "pubmed_abstracts.csv"
 OUT_DIR = PROJECT_ROOT / "data" / "processed"
-OUT_PATH = OUT_DIR / "pubmed_sentences.csv"
+OUT_PATH = OUT_DIR / "pubmed_sentences.parquet"
 
 
 def simple_sentence_split(text: str) -> list:
-    """
-    Clean, minimal and safe sentence splitter.
-    """
     if not isinstance(text, str):
         return []
-    text = " ".join(text.split())  # normalize spacing
+    text = " ".join(text.split())  # normalize whitespace
 
     sentences = []
     buf = []
@@ -36,12 +32,6 @@ def simple_sentence_split(text: str) -> list:
 
 
 def extract_abstract_text(cell):
-    """
-    Safely extract abstract text from:
-    - plain strings
-    - Python list strings: "(['text'],)"
-    - nested lists
-    """
     if pd.isna(cell):
         return None
     if not isinstance(cell, str):
@@ -51,24 +41,16 @@ def extract_abstract_text(cell):
     if not raw:
         return None
 
-    # Try parsing list-like structures
     if raw.startswith("(") or raw.startswith("["):
         try:
             parsed = ast.literal_eval(raw)
-
-            # Example structures:
-            # ['abstract'], (['abstract'],), (['abstract'], ['kw'])
             if isinstance(parsed, (list, tuple)) and len(parsed) > 0:
                 first = parsed[0]
-
-                # If first element is itself a list
                 if isinstance(first, (list, tuple)) and len(first) > 0:
                     return str(first[0])
-
                 return str(first)
-
         except Exception:
-            return raw  # fallback
+            return raw
 
     return raw
 
@@ -78,19 +60,11 @@ def prepare():
         raise FileNotFoundError(f"Missing file: {RAW_PATH}")
 
     OUT_DIR.mkdir(parents=True, exist_ok=True)
-    if OUT_PATH.exists():
-        OUT_PATH.unlink()
 
     print(f"Reading: {RAW_PATH}")
     df = pd.read_csv(RAW_PATH)
     print(f"Loaded {len(df)} rows")
 
-    # ----------------------------------------------------------------------
-    # Detect content columns for this dataset:
-    # Keep all columns EXCEPT:
-    # - "_links" columns
-    # - "Unnamed: 0"
-    # ----------------------------------------------------------------------
     abstract_columns = [
         c for c in df.columns
         if not c.lower().endswith("_links")
@@ -98,37 +72,30 @@ def prepare():
         and c.strip() != ""
     ]
 
-    print("Detected content columns (these contain abstracts):")
-    print(abstract_columns)
+    print("Detected content columns:", abstract_columns)
 
-    total_abstracts = 0
+    rows = []
     total_sentences = 0
 
-    with OUT_PATH.open("w", newline="", encoding="utf-8") as f_out:
-        writer = csv.writer(f_out)
-        writer.writerow(["pmid", "sentence"])
+    for row_idx, row in df.iterrows():
+        for col in abstract_columns:
+            cell = row[col]
+            text = extract_abstract_text(cell)
 
-        for row_idx, row in df.iterrows():
-            for col in abstract_columns:
-                cell = row[col]
-                text = extract_abstract_text(cell)
+            if not text:
+                continue
 
-                if not text or not isinstance(text, str):
-                    continue
+            pmid = f"{col}_{row_idx}"
+            sentences = simple_sentence_split(text)
 
-                pmid = f"{col}_{row_idx}"
+            for sent in sentences:
+                rows.append({"pmid": pmid, "sentence": sent})
+                total_sentences += 1
 
-                sentences = simple_sentence_split(text)
-
-                for sent in sentences:
-                    if sent.strip():
-                        writer.writerow([pmid, sent])
-                        total_sentences += 1
-
-                total_abstracts += 1
+    out_df = pd.DataFrame(rows)
+    out_df.to_parquet(OUT_PATH, index=False)
 
     print("Done.")
-    print(f"Total abstract entries processed: {total_abstracts}")
     print(f"Total sentences extracted: {total_sentences}")
     print(f"Output written to: {OUT_PATH}")
 
