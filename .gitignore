@@ -27,6 +27,7 @@ wheels/
 *.egg
 
 # Data files - avoid committing large datasets
+data/
 data/raw/
 data/processed/
 *.parquet
@@ -97,16 +98,7 @@ secrets.json
 *.sqlite
 *.sqlite3
 
-# Neo4j database files and data
-neo4j/data/
-neo4j/logs/
-neo4j/plugins/
-*.neo4j
-
 # ChromaDB files and vector database
 chroma_db/
 data/chroma/
 *.chroma
-
-# Streamlit secrets
-.streamlit/secrets.toml
