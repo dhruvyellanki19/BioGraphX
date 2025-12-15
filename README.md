@@ -4,6 +4,8 @@
 
 **Authors:** Sai Dhruv Yellanki Hanmanthrao, Anvesh Chitturi, Shruthi Raj Gangapuri, Venkata SatySai Maruti Kameshwar Modali
 
+**Team Name: Team Kanya Raashi**
+
 ---
 
 ## Table of Contents
