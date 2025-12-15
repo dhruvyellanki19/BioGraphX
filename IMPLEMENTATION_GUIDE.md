@@ -635,9 +635,9 @@ python rag/query_pipeline.py "What is diabetes?"
 ```python
 # LoRA Config
 lora_config = LoraConfig(
-    r=8,                          # LoRA rank
-    lora_alpha=16,                # Scaling factor
-    target_modules=["q_proj", "v_proj"],  # Attention layers
+    r=16,                         # LoRA rank
+    lora_alpha=32,                # Scaling factor (2x rank)
+    target_modules=["q_proj", "k_proj", "v_proj", "o_proj"],  # Attention layers
     lora_dropout=0.05,
     bias="none",
     task_type="CAUSAL_LM"
@@ -646,13 +646,14 @@ lora_config = LoraConfig(
 # Training Config
 training_args = TrainingArguments(
     output_dir="models/fine_tuned/qwen25_1_5b_medquad",
-    num_train_epochs=2,
+    num_train_epochs=1,           # Optimized for speed
     per_device_train_batch_size=1,
     gradient_accumulation_steps=8,
     learning_rate=2e-4,
-    fp16=True,                    # Mixed precision
+    fp16=False,                   # Using bfloat16 instead
+    max_length=384,               # Sequence length
     logging_steps=50,
-    save_steps=500
+    save_steps=120
 )
 ```
 
