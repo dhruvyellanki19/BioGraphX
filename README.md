@@ -1,6 +1,8 @@
 # BioGraphX - Biomedical AI Question Answering System
 
-**An intelligent multi-agent RAG system for biomedical question answering powered by retrieval-augmented generation, knowledge graphs, and fine-tuned language models.**
+**An intelligent multi-agent system for biomedical question answering powered by retrieval-augmented generation, knowledge graphs, and fine-tuned language models.**
+
+**Authors:** Sai Dhruv Yellanki Hanmanthrao, Anvesh Chitturi, 
 
 ---
 
@@ -120,7 +122,7 @@ Final Answer with Evidence
 
 #### 4. Web Application (app/)
 - **Framework**: Flask with CORS support
-- **Interface**: dark theme UI
+- **Interface**: ChatGPT-style dark theme UI
 - **Features**: Real-time processing, collapsible evidence panels, interactive display
 - **API**: RESTful endpoints for question answering
 
@@ -458,12 +460,33 @@ After comprehensive evaluation, **Qwen2.5-1.5B-Instruct** was selected as the pr
 ## Model Information
 
 ### Fine-Tuned Qwen2.5-1.5B
-- **Base**: Qwen/Qwen2.5-1.5B-Instruct
-- **Training**: LoRA fine-tuning on MedQuAD
-- **Parameters**: 1.5B total, 3.6M trainable (0.12%)
-- **Training Data**: 14,724 biomedical Q&A pairs
-- **Epochs**: 2
-- **Location**: `models/fine_tuned/qwen25_1_5b_medquad_merged/`
+
+**Base Model**: Qwen/Qwen2.5-1.5B-Instruct
+
+**Training Configuration**:
+- **Method**: LoRA (Low-Rank Adaptation) parameter-efficient fine-tuning
+- **Training Data**: 14,724 MedQuAD biomedical Q&A pairs (90% split)
+- **Validation Data**: 1,635 pairs (10% split)
+- **Total Parameters**: 1.5B
+- **Trainable Parameters**: 3.6M (0.12% of full model)
+
+**Training Hyperparameters**:
+- **Epochs**: 1
+- **Batch Size**: 1 per device
+- **Gradient Accumulation Steps**: 8 (effective batch size: 8)
+- **Learning Rate**: 2×10⁻⁴
+- **Precision**: bfloat16
+- **Sequence Length**: 384 tokens
+- **Optimizer**: AdamW
+
+**LoRA Configuration**:
+- **Rank (r)**: 16
+- **Alpha**: 32
+- **Dropout**: 0.05
+- **Target Modules**: q_proj, k_proj, v_proj, o_proj (attention layers)
+- **Bias**: none
+
+**Model Location**: `models/fine_tuned/qwen25_1_5b_medquad_merged/`
 
 ### SciSpaCy NER Model
 - **Model**: en_ner_bc5cdr_md v0.5.4
@@ -553,6 +576,7 @@ This project is for educational and research purposes.
 ## Acknowledgments
 
 - **SciSpaCy**: Biomedical NLP models
+- **Qwen**: Base language model
 - **ChromaDB**: Vector database
 - **HuggingFace**: Transformers library
 - **MedQuAD**: Training dataset
