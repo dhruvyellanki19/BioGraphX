@@ -120,7 +120,7 @@ Final Answer with Evidence
 
 #### 4. Web Application (app/)
 - **Framework**: Flask with CORS support
-- **Interface**: ChatGPT-style dark theme UI
+- **Interface**: dark theme UI
 - **Features**: Real-time processing, collapsible evidence panels, interactive display
 - **API**: RESTful endpoints for question answering
 
