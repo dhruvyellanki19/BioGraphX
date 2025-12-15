@@ -1,6 +1,6 @@
 # BioGraphX - Biomedical AI Question Answering System
 
-**An intelligent multi-agent system for biomedical question answering powered by retrieval-augmented generation, knowledge graphs, and fine-tuned language models.**
+**An intelligent multi-agent RAG system for biomedical question answering powered by retrieval-augmented generation, knowledge graphs, and fine-tuned language models.**
 
 ---
 
