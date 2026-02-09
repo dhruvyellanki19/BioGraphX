@@ -2,10 +2,6 @@
 
 **An intelligent multi-agent RAG system for biomedical question answering powered by retrieval-augmented generation, knowledge graphs, and fine-tuned language models.**
 
-**Authors:** Sai Dhruv Yellanki Hanmanthrao, Anvesh Chitturi, Shruthi Raj Gangapuri, Venkata SatySai Maruti Kameshwar Modali
-
-**Team Name: Team Kanya Raashi**
-
 ---
 
 ## Table of Contents
